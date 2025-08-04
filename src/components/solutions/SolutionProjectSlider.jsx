@@ -59,7 +59,7 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                   if (!loadedImages[index]) {
                     setLoadedImages((prev) => ({ ...prev, [index]: false }));
                   }
-                }, 300);
+                }, 100); // Very short delay before showing loader
                 return () => clearTimeout(loaderTimers.current[index]);
               }, [index, slide.image]);
 
@@ -80,26 +80,12 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                       <img
                         src={slide.image}
                         alt={slide.alt || "Project Image"}
-                        loading="lazy"
+                        loading="eager" // <-- load immediately
                         onLoad={() => handleImageLoad(index)}
                         onError={() => handleImageError(index)}
-                        style={{
-                          opacity: showLoader ? 0 : 1,
-                        }}
                       />
                     ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "#ccc",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        Image failed to load
-                      </div>
+                      <div>Image failed to load</div>
                     )}
                   </div>
                 </div>
