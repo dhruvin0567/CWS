@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -13,38 +13,25 @@ const GlobalStyle = createGlobalStyle`
 const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
   slides = [],
 }) {
-  const [loadState, setLoadState] = useState({});
-  //   const [loadState, setLoadState] = useState({});
+  const [loadedImages, setLoadedImages] = useState({});
 
-  useEffect(() => {
-    slides.forEach((_, index) => {
-      setTimeout(() => {
-        setLoadState((prev) => ({
-          ...prev,
-          [index]: {
-            ...(prev[index] || {}),
-            delayPassed: true,
-          },
-        }));
-      }, 1500);
-    });
-  }, [slides]);
+  const loaderTimers = useRef({});
 
   const handleImageLoad = (index) => {
-    setLoadState((prev) => ({
-      ...prev,
-      [index]: {
-        ...(prev[index] || {}),
-        loaded: true,
-      },
-    }));
+    clearTimeout(loaderTimers.current[index]);
+    setLoadedImages((prev) => ({ ...prev, [index]: true }));
+  };
+
+  const handleImageError = (index) => {
+    clearTimeout(loaderTimers.current[index]);
+    setLoadedImages((prev) => ({ ...prev, [index]: "error" }));
   };
 
   const sliderSettings = {
     dots: false,
     arrows: false,
     infinite: true,
-    speed: 1500,
+    speed: 1000,
     autoplay: true,
     autoplaySpeed: 2500,
     slidesToShow: 4,
@@ -66,8 +53,19 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
         <div className="container-fluid">
           <Slider {...sliderSettings} className="custom-slider">
             {slides.map((slide, index) => {
-              const state = loadState[index] || {};
-              const showImage = state.loaded && state.delayPassed;
+              const isLoaded = loadedImages[index];
+              const showLoader = isLoaded !== true;
+
+              // Setup delayed loader trigger
+              useEffect(() => {
+                loaderTimers.current[index] = setTimeout(() => {
+                  if (!loadedImages[index]) {
+                    setLoadedImages((prev) => ({ ...prev, [index]: false }));
+                  }
+                }, 300); // Only show loader if image not loaded within 300ms
+
+                return () => clearTimeout(loaderTimers.current[index]);
+              }, [index, slide.image]);
 
               return (
                 <div className="slide-item" key={slide.id || index}>
@@ -75,7 +73,7 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                     className="aximo-project-thumb Solution-slider mb-0"
                     style={{ position: "relative", minHeight: "250px" }}
                   >
-                    {!showImage && (
+                    {showLoader && (
                       <div className="image-loader">
                         <div className="aximo-preloader">
                           <div></div>
@@ -84,12 +82,17 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                         </div>
                       </div>
                     )}
-                    <img
-                      src={slide.image}
-                      alt={slide.alt || "Project Image"}
-                      //   loading="lazy"
-                      onLoad={() => handleImageLoad(index)}
-                    />
+                    {isLoaded !== "error" ? (
+                      <img
+                        src={slide.image}
+                        alt={slide.alt || "Project Image"}
+                        loading="lazy"
+                        onLoad={() => handleImageLoad(index)}
+                        onError={() => handleImageError(index)}
+                      />
+                    ) : (
+                      <div className="image-error">Image failed to load</div>
+                    )}
                   </div>
                 </div>
               );
