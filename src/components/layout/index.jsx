@@ -4,15 +4,15 @@ import Preloader from "../common/Preloader";
 import ScrollToTop from "../common/ScrollToTop";
 import WhatsAppButton from "../common/WhatsAppButton";
 function Layout() {
-	useScrollTop();
-	return (
-		<>
-			<Preloader />
-			<Outlet />
-			<ScrollToTop />
-			<WhatsAppButton />
-		</>
-	);
+  useScrollTop();
+  return (
+    <>
+      <Preloader />
+      <Outlet />
+      <ScrollToTop />
+      <WhatsAppButton />
+    </>
+  );
 }
 
 export default Layout;
