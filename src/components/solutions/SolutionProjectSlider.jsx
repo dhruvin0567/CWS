@@ -14,6 +14,7 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
   slides = [],
 }) {
   const [loadState, setLoadState] = useState({});
+  //   const [loadState, setLoadState] = useState({});
 
   useEffect(() => {
     slides.forEach((_, index) => {
