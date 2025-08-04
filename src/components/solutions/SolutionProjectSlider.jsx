@@ -14,7 +14,6 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
   slides = [],
 }) {
   const [loadedImages, setLoadedImages] = useState({});
-
   const loaderTimers = useRef({});
 
   const handleImageLoad = (index) => {
@@ -37,7 +36,6 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
     slidesToShow: 4,
     slidesToScroll: 1,
     pauseOnHover: false,
-    focusOnSelect: false,
     responsive: [
       { breakpoint: 1280, settings: { slidesToShow: 4 } },
       { breakpoint: 1024, settings: { slidesToShow: 3 } },
@@ -56,23 +54,18 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
               const isLoaded = loadedImages[index];
               const showLoader = isLoaded !== true;
 
-              // Setup delayed loader trigger
               useEffect(() => {
                 loaderTimers.current[index] = setTimeout(() => {
                   if (!loadedImages[index]) {
                     setLoadedImages((prev) => ({ ...prev, [index]: false }));
                   }
-                }, 300); // Only show loader if image not loaded within 300ms
-
+                }, 300);
                 return () => clearTimeout(loaderTimers.current[index]);
               }, [index, slide.image]);
 
               return (
                 <div className="slide-item" key={slide.id || index}>
-                  <div
-                    className="aximo-project-thumb Solution-slider mb-0"
-                    style={{ position: "relative", minHeight: "250px" }}
-                  >
+                  <div className="aximo-project-thumb Solution-slider mb-0">
                     {showLoader && (
                       <div className="image-loader">
                         <div className="aximo-preloader">
@@ -82,6 +75,7 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                         </div>
                       </div>
                     )}
+
                     {isLoaded !== "error" ? (
                       <img
                         src={slide.image}
@@ -89,9 +83,23 @@ const SolutionProjectSlider = React.memo(function SolutionProjectSlider({
                         loading="lazy"
                         onLoad={() => handleImageLoad(index)}
                         onError={() => handleImageError(index)}
+                        style={{
+                          opacity: showLoader ? 0 : 1,
+                        }}
                       />
                     ) : (
-                      <div className="image-error">Image failed to load</div>
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          background: "#ccc",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        Image failed to load
+                      </div>
                     )}
                   </div>
                 </div>
